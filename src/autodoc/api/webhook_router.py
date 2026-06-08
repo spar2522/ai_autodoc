@@ -1,0 +1,43 @@
+from fastapi import APIRouter
+from fastapi import Request
+
+from autodoc.events.github_push_event import GithubPushEvent
+from autodoc.queue.queue_names import REVIEW_QUEUE
+from autodoc.queue.redis_task_queue import RedisTaskQueue
+
+router = APIRouter()
+
+task_queue = RedisTaskQueue(REVIEW_QUEUE)
+
+
+# Sample API endpoint to receive GitHub webhooks. In production, you would want to add
+# curl -X POST \
+# http://localhost:9000/webhook/github \
+# -H "Content-Type: application/json" \
+# -d '{
+#   "repository": {
+#     "full_name": "spar2522/ai-backend"
+#   },
+#   "commits": [
+#     {
+#       "id": "0394eb9"
+#     }
+#   ]
+# }'
+@router.post("/webhook/github")
+async def github_webhook(request: Request):
+
+    payload = await request.json()
+
+    repo_name = payload["repository"]["full_name"]
+
+    for commit in payload.get("commits", []):
+
+        event = GithubPushEvent(
+            type="github_push",
+            github_repo=repo_name,
+            commit_hash=commit["id"],
+        )
+        await task_queue.enqueue(event)
+
+    return {"status": "accepted"}
