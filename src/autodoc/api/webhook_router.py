@@ -51,7 +51,6 @@ async def github_webhook(request: Request):
         print(f"Error processing webhook: {e}")
         return {"error": "Internal server error"}, 500
 
-
 def extract_event_type(request: Request) -> str:
     """Extract the GitHub event type from the request headers."""
     return request.headers.get("X-GitHub-Event", "unknown")
