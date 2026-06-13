@@ -32,6 +32,7 @@ async def github_webhook(request: Request):
         commits = webhook_payload.get("commits", [])
         for commit in commits:
             if is_auto_doc_commit(commit):
+                print(f"Not Processing AutoDoc-generated commit: {commit.get('id')}")
                 continue
 
             commit_hash = commit.get("id")
@@ -50,6 +51,7 @@ async def github_webhook(request: Request):
     except Exception as e:
         print(f"Error processing webhook: {e}")
         return {"error": "Internal server error"}, 500
+
 
 def extract_event_type(request: Request) -> str:
     """Extract the GitHub event type from the request headers."""
