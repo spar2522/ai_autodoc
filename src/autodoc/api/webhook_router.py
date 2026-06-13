@@ -27,6 +27,9 @@ task_queue = RedisTaskQueue(REVIEW_QUEUE)
 @router.post("/webhook/github")
 async def github_webhook(request: Request):
 
+    event_type = request.headers.get("X-GitHub-Event")
+    print(f"Received GitHub event: {event_type}")
+
     payload = await request.json()
 
     repo_name = payload["repository"]["full_name"]
