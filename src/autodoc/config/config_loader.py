@@ -4,6 +4,7 @@ from autodoc.datamodels.repo_config import RepoConfig
 from autodoc.config.runtime_config import Config
 
 
+# testing
 def load_config(path: str) -> Config:
 
     with open(path) as f:
