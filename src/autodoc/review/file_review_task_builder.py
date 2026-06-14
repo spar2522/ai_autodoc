@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from autodoc.config.runtime_config import Config
 
 from autodoc.datamodels.file_review_task import (
@@ -24,7 +26,14 @@ def build_file_review_task(
     repo_path: str,
     commit_hash: str,
     file_path: str,
-) -> FileReviewTask:
+) -> FileReviewTask | None:
+    full_path = Path(repo_path) / file_path
+
+    if not full_path.exists():
+
+        print(f"Skipping deleted file: {file_path}")
+
+        return None
 
     return FileReviewTask(
         github_repo=github_repo,
