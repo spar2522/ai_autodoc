@@ -3,5 +3,19 @@ services:
     image: redis:8
     container_name: autodoc-redis
     ports:
-      - "6380:6379"
-    restart: unless-stopped
+      - "6380:6379"  # Map host port 6380 to container port 6379 (avoiding conflict with other Redis instances)
+    volumes:
+      - type: volume
+        source: redis-data
+        target: /data  # Persist Redis data across container restarts
+    restart: unless-stopped  # Ensure container restarts unless manually stopped
+    networks:
+      - redis-network  # Isolate Redis service on a dedicated network
+
+networks:
+  redis-network:
+    driver: bridge  # Use bridge network for container communication
+
+volumes:
+  redis-data:
+    driver: local  # Local storage for Redis data persistence
