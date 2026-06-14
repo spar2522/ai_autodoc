@@ -11,6 +11,15 @@ class GithubClient:
 
         self.base_url = "https://api.github.com"
 
+        timeout = httpx.Timeout(
+            connect=30.0,
+            read=60.0,
+            write=60.0,
+            pool=60.0,
+        )
+
+        self.client = httpx.AsyncClient(timeout=timeout)
+
     def _headers(self):
 
         return {
@@ -22,32 +31,28 @@ class GithubClient:
         self,
         path: str,
     ):
+        print(f"GitHub GET: {path}")
+        response = await self.client.get(
+            f"{self.base_url}{path}",
+            headers=self._headers(),
+        )
 
-        async with httpx.AsyncClient() as client:
+        response.raise_for_status()
 
-            response = await client.get(
-                f"{self.base_url}{path}",
-                headers=self._headers(),
-            )
-
-            response.raise_for_status()
-
-            return response.json()
+        return response.json()
 
     async def post(
         self,
         path: str,
         payload: dict,
     ):
+        print(f"GitHub POST: {path}")
+        response = await self.client.post(
+            f"{self.base_url}{path}",
+            headers=self._headers(),
+            json=payload,
+        )
 
-        async with httpx.AsyncClient() as client:
+        response.raise_for_status()
 
-            response = await client.post(
-                f"{self.base_url}{path}",
-                headers=self._headers(),
-                json=payload,
-            )
-
-            response.raise_for_status()
-
-            return response.json()
+        return response.json()

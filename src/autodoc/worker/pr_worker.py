@@ -28,29 +28,30 @@ async def worker(
     print("PR Worker started")
     while True:
 
-        event_data = await task_queue.dequeue()
-        event = create_event(event_data)
+        try:
 
-        print(
-            f"================ Received event for PR Worker: "
-            f"{event} ================="
-        )
-        if isinstance(
-            event,
-            CodeImprovementGeneratedEvent,
-        ):
-            print(f"Pushing branch : " f"{event.review_branch}")
-            push_branch(
-                worktree_path=event.worktree_path,
-                review_branch=event.review_branch,
+            event_data = await task_queue.dequeue()
+            event = create_event(event_data)
+            print(
+                f"================ Received event for PR Worker: "
+                f"{event} ================="
             )
+            if isinstance(
+                event,
+                CodeImprovementGeneratedEvent,
+            ):
+                print(f"Pushing branch : " f"{event.review_branch}")
+                push_branch(
+                    worktree_path=event.worktree_path,
+                    review_branch=event.review_branch,
+                )
 
-            pr_manager = PRManager()
+                pr_manager = PRManager()
 
-            existing_pr = await pr_manager.find_open_pr(
-                github_repo=event.github_repo,
-                review_branch=event.review_branch,
-            )
+                existing_pr = await pr_manager.find_open_pr(
+                    github_repo=event.github_repo,
+                    review_branch=event.review_branch,
+                )
 
             if existing_pr:
 
@@ -64,3 +65,7 @@ async def worker(
                 )
 
                 print(f"Created PR: " f"{pr['html_url']}")
+
+        except Exception as ex:
+
+            print(f"PR Worker failed: {ex}")
