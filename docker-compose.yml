@@ -1,0 +1,7 @@
+services:
+  redis:
+    image: redis:8
+    container_name: autodoc-redis
+    ports:
+      - "6380:6379"
+    restart: unless-stopped
