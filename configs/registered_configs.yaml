@@ -9,7 +9,6 @@ repos:
     local_path: /Users/arpitratan/ai-lab/repo_analyst_agent
     default_branch: main
 
-
 model: qwen3:14b
 
 worktree_root: /Users/arpitratan/ai-worktrees
