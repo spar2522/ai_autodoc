@@ -2,7 +2,7 @@
 set -e
 
 # Script to start Redis container with Docker Compose
-# Usage: ./start_redis.sh
+# Usage: ./scripts/start_redis.sh
 
 # Check if Docker is running, start Docker Desktop if not
 if ! docker info >/dev/null 2>&1; then

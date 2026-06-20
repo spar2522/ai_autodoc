@@ -1,8 +1,16 @@
 #!/bin/bash
+set -e
 
-cd "$(dirname "$0")/.."
+# Navigate to the project root directory
+cd "$(dirname "$0")/.." || { echo "Failed to change directory"; exit 1; }
 
-uv run uvicorn autodoc.api.app:app \
+# Configuration variables
+HOST="0.0.0.0"
+PORT="9000"
+APP_MODULE="autodoc.api.app:app"
+
+# Start the Uvicorn server
+uv run uvicorn "$APP_MODULE" \
     --reload \
-    --host 0.0.0.0 \
-    --port 9000
+    --host "$HOST" \
+    --port "$PORT"

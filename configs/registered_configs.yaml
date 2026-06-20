@@ -5,6 +5,10 @@ repos:
   - github_repo: spar2522/ai_autodoc
     local_path: /Users/arpitratan/ai-lab/ai_autodoc
     default_branch: main
+  - github_repo: spar2522/repo_analyst_agent
+    local_path: /Users/arpitratan/ai-lab/repo_analyst_agent
+    default_branch: main
+
 
 model: qwen3:14b
 

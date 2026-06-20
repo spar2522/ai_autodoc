@@ -34,92 +34,98 @@ async def worker(
 ):
     print("Review Worker started")
     while True:
-
-        event_data = await review_task_queue.dequeue()
-        event = create_event(event_data)
-        print(event)
-        repo = get_repo(
-            config,
-            event.github_repo,
-        )
-
-        if repo is None:
-            print(f"Unknown repository: " f"{event.github_repo}")
-            continue
-
-        print(f"Resolved repo: " f"{repo.local_path}")
-
-        sync_repository(
-            repo.local_path,
-        )
-
-        ensure_commit_exists(
-            repo.local_path,
-            event.commit_hash,
-        )
-
-        files = get_changed_files(
-            repo.local_path,
-            event.commit_hash,
-        )
-
-        print("Changed files:")
-
-        for file in files:
-            task = build_file_review_task(
-                config=config,
-                github_repo=event.github_repo,
-                repo_path=repo.local_path,
-                commit_hash=event.commit_hash,
-                file_path=file,
+        try:
+            event_data = await review_task_queue.dequeue()
+            event = create_event(event_data)
+            print(event)
+            repo = get_repo(
+                config,
+                event.github_repo,
             )
-            print(task)
 
-            try:
-                agent = CodeImprovementAgent()
+            if repo is None:
+                print(f"Unknown repository: " f"{event.github_repo}")
+                continue
 
-                updated_file = await agent.run(
-                    task,
-                    config.model,
-                )
+            print(f"Resolved repo: " f"{repo.local_path}")
 
-                write_file(
-                    repo_path=task.worktree_path,
-                    relative_path=task.file_path,
-                    content=updated_file,
-                )
+            sync_repository(
+                repo.local_path,
+            )
 
-                print(f"Updated {task.file_path}")
+            ensure_commit_exists(
+                repo.local_path,
+                event.commit_hash,
+            )
 
-                diff = get_worktree_diff(worktree_path=task.worktree_path)
+            files = get_changed_files(
+                repo.local_path,
+                event.commit_hash,
+            )
 
-                print("=== GENERATED DIFF ===")
+            print("Changed files:")
 
-                print(diff)
+            for file in files:
+                try:
+                    task = build_file_review_task(
+                        config=config,
+                        github_repo=event.github_repo,
+                        repo_path=repo.local_path,
+                        commit_hash=event.commit_hash,
+                        file_path=file,
+                    )
 
-                if not has_meaningful_change(diff):
-                    print("No meaningful changes.")
+                    if task is None:
+                        continue
 
+                    print(task)
+
+                    agent = CodeImprovementAgent()
+
+                    updated_file = await agent.run(
+                        task,
+                        config.model,
+                    )
+
+                    write_file(
+                        repo_path=task.worktree_path,
+                        relative_path=task.file_path,
+                        content=updated_file,
+                    )
+
+                    print(f"Updated {task.file_path}")
+
+                    diff = get_worktree_diff(worktree_path=task.worktree_path)
+
+                    print("=== GENERATED DIFF ===")
+
+                    print(diff)
+
+                    if not has_meaningful_change(diff):
+                        print("No meaningful changes.")
+
+                        continue
+
+                    commit_changes(
+                        worktree_path=task.worktree_path,
+                        file_path=task.file_path,
+                    )
+
+                    code_improvement_event = CodeImprovementGeneratedEvent(
+                        type="code_improvement_generated",
+                        github_repo=task.github_repo,
+                        review_branch=task.review_branch,
+                        worktree_path=task.worktree_path,
+                        file_path=task.file_path,
+                        commit_hash=event.commit_hash,
+                    )
+
+                    await pr_task_queue.enqueue(code_improvement_event)
+                except Exception as e:
+                    print(f"Failed review for file {task.file_path}: {e}")
+                    print(f"Trying other files if any...")
                     continue
 
-                commit_changes(
-                    worktree_path=task.worktree_path,
-                    file_path=task.file_path,
-                )
+        except Exception as e:
 
-                code_improvement_event = CodeImprovementGeneratedEvent(
-                    type="code_improvement_generated",
-                    github_repo=task.github_repo,
-                    review_branch=task.review_branch,
-                    worktree_path=task.worktree_path,
-                    file_path=task.file_path,
-                    commit_hash=event.commit_hash,
-                )
-
-                await pr_task_queue.enqueue(code_improvement_event)
-
-            except Exception as e:
-
-                print(f"Failed review: {e}")
-
-            continue
+            print(f"Failed review: {e}")
