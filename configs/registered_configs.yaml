@@ -2,14 +2,18 @@ repos:
   - github_repo: spar2522/ai-backend
     local_path: /Users/arpitratan/ai-lab/ai-backend
     default_branch: main
+    # Main backend repository for the project
   - github_repo: spar2522/ai_autodoc
     local_path: /Users/arpitratan/ai-lab/ai_autodoc
     default_branch: main
+    # Auto-documentation tool for the project
   - github_repo: spar2522/repo_analyst_agent
     local_path: /Users/arpitratan/ai-lab/repo_analyst_agent
     default_branch: main
-
+    # Repository analyst agent for code analysis
 
 model: qwen3:14b
+# Default model used for processing
 
 worktree_root: /Users/arpitratan/ai-worktrees
+# Root directory for worktrees
