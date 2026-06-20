@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+if ! docker info >/dev/null 2>&1; then
+    echo "Starting Docker Desktop..."
+    open -a Docker
+    echo "Waiting for Docker..."
+    until docker info >/dev/null 2>&1; do
+        sleep 2
+    done
+fi
+
 # Trap Ctrl+C to stop containers and exit
 trap 'echo "Stopping Redis container..."; docker compose down; exit 1' SIGINT
 
