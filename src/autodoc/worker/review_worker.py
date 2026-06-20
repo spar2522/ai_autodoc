@@ -32,6 +32,7 @@ pr_task_queue = RedisTaskQueue(PR_QUEUE)
 async def worker(
     config: Config,
 ):
+    """Main worker function for processing code review tasks."""
     print("Review Worker started")
     while True:
         try:
@@ -44,25 +45,17 @@ async def worker(
             )
 
             if repo is None:
-                print(f"Unknown repository: " f"{event.github_repo}")
+                print(f"Unknown repository: {event.github_repo}")
                 continue
 
-            print(f"Resolved repo: " f"{repo.local_path}")
+            print(f"Resolved repo: {repo.local_path}")
 
-            sync_repository(
-                repo.local_path,
-            )
+            # Sync repository and ensure commit exists
+            sync_repository(repo.local_path)
+            ensure_commit_exists(repo.local_path, event.commit_hash)
 
-            ensure_commit_exists(
-                repo.local_path,
-                event.commit_hash,
-            )
-
-            files = get_changed_files(
-                repo.local_path,
-                event.commit_hash,
-            )
-
+            # Get changed files for the commit
+            files = get_changed_files(repo.local_path, event.commit_hash)
             print("Changed files:")
 
             for file in files:
@@ -81,11 +74,7 @@ async def worker(
                     print(task)
 
                     agent = CodeImprovementAgent()
-
-                    updated_file = await agent.run(
-                        task,
-                        config.model,
-                    )
+                    updated_file = await agent.run(task, config.model)
 
                     write_file(
                         repo_path=task.worktree_path,
@@ -96,14 +85,11 @@ async def worker(
                     print(f"Updated {task.file_path}")
 
                     diff = get_worktree_diff(worktree_path=task.worktree_path)
-
                     print("=== GENERATED DIFF ===")
-
                     print(diff)
 
                     if not has_meaningful_change(diff):
                         print("No meaningful changes.")
-
                         continue
 
                     commit_changes(
@@ -127,5 +113,4 @@ async def worker(
                     continue
 
         except Exception as e:
-
             print(f"Failed review: {e}")
