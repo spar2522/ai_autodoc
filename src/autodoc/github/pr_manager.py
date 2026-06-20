@@ -28,6 +28,7 @@ class PRManager:
         self,
         github_repo: str,
         review_branch: str,
+        file_path: str,
     ):
 
         return await self.client.post(
