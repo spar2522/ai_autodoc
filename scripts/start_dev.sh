@@ -42,6 +42,7 @@ done
 osascript <<EOF
 tell application "iTerm"
     # Create main window with Redis profile
+    # Ensure "Redis" profile exists in iTerm preferences
     create window with profile "Redis"
     
     # Configure Redis session
@@ -52,24 +53,28 @@ tell application "iTerm"
     # Create additional tabs in the same window
     tell current window
         # Ollama tab
+        # Ensure "Ollama" profile exists in iTerm preferences
         create tab with profile "Ollama"
         tell current session
             write text "cd $PROJECT_ROOT && ./scripts/start_ollama.sh"
         end tell
         
         # API tab
+        # Ensure "API" profile exists in iTerm preferences
         create tab with profile "API"
         tell current session
             write text "cd $PROJECT_ROOT && ./scripts/start_api.sh"
         end tell
         
         # Workers tab
+        # Ensure "Workers" profile exists in iTerm preferences
         create tab with profile "Workers"
         tell current session
             write text "cd $PROJECT_ROOT && ./scripts/start_workers.sh"
         end tell
         
         # Ngrok tab
+        # Ensure "Ngrok" profile exists in iTerm preferences
         create tab with profile "Ngrok"
         tell current session
             write text "cd $PROJECT_ROOT && ./scripts/start_ngrok.sh"
