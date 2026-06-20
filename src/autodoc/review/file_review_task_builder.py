@@ -52,7 +52,7 @@ def build_file_review_task(
             github_repo=github_repo,
             commit_hash=commit_hash,
             file_path=file_path,
-            review_branch=create_review_branch_name(file_path),
+            review_branch=create_review_branch_name(file_path, commit_hash),
             diff=get_file_diff(
                 repo_path,
                 commit_hash,
@@ -64,7 +64,7 @@ def build_file_review_task(
             ),
             worktree_path=ensure_worktree_exists(
                 repo_path,
-                create_review_branch_name(file_path),
+                create_review_branch_name(file_path, commit_hash),
                 config.worktree_root,
             ),
         )

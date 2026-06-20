@@ -1,3 +1,4 @@
+from http import client
 import os
 
 import httpx
@@ -48,6 +49,23 @@ class GithubClient:
     ):
         print(f"GitHub POST: {path}")
         response = await self.client.post(
+            f"{self.base_url}{path}",
+            headers=self._headers(),
+            json=payload,
+        )
+
+        response.raise_for_status()
+
+        return response.json()
+
+    async def patch(
+        self,
+        path: str,
+        payload: dict,
+    ):
+        print(f"GitHub PATCH: {path}")
+
+        response = await self.client.patch(
             f"{self.base_url}{path}",
             headers=self._headers(),
             json=payload,

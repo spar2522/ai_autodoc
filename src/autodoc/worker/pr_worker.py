@@ -48,20 +48,26 @@ async def worker(
 
                 pr_manager = PRManager()
 
-                existing_pr = await pr_manager.find_open_pr(
+                existing_pr = await pr_manager.find_open_pr_for_file(
                     github_repo=event.github_repo,
-                    review_branch=event.review_branch,
+                    file_path=event.file_path,
                 )
 
             if existing_pr:
 
-                print(f"PR already exists: " f"{existing_pr['html_url']}")
+                print(f"Closing stale PR: " f"{existing_pr['html_url']}")
+
+                await pr_manager.close_pr(
+                    github_repo=event.github_repo,
+                    pr_number=existing_pr["number"],
+                )
 
             else:
 
                 pr = await pr_manager.create_pr(
                     github_repo=event.github_repo,
                     review_branch=event.review_branch,
+                    file_path=event.file_path,
                 )
 
                 print(f"Created PR: " f"{pr['html_url']}")
