@@ -62,15 +62,13 @@ async def worker(
                     pr_number=existing_pr["number"],
                 )
 
-            else:
+            pr = await pr_manager.create_pr(
+                github_repo=event.github_repo,
+                review_branch=event.review_branch,
+                file_path=event.file_path,
+            )
 
-                pr = await pr_manager.create_pr(
-                    github_repo=event.github_repo,
-                    review_branch=event.review_branch,
-                    file_path=event.file_path,
-                )
-
-                print(f"Created PR: " f"{pr['html_url']}")
+            print(f"Created PR: " f"{pr['html_url']}")
 
         except Exception as ex:
 
