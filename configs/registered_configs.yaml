@@ -11,6 +11,10 @@ repos:
     local_path: /Users/arpitratan/ai-lab/repo_analyst_agent
     default_branch: main
     # Repository analyst agent for code analysis
+  - github_repo: spar2522/ai_platform
+    local_path: /Users/arpitratan/ai-lab/ai_platform
+    default_branch: main
+    # Repository ai platform for bytesized AI libraries
 
 model: qwen3:14b
 # Default model used for processing
